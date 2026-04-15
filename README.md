@@ -12,7 +12,11 @@ This repo is managed by ArgoCD. Every change pushed here is automatically reconc
 k8s/
 ├── metalLB/
 │   ├── ipaddresspool.yaml     # IP pool 192.168.0.20-40
-│   └── ingress/               # IngressRoute definitions
+│   └──  ingress/              # IngressRoute definitions
+|       ├── argocd-ingress.yaml    # LB argo.local
+│       ├── grafana-ingress.yaml   # LB grafana.local
+│       ├── open-webui.yaml        # LB open-webui.local
+│       ├── prometheus.yaml        # LB prometheus.local
 ├── ollama/
 │   ├── pv.yaml                # PersistentVolume — NFS mount from Proxmox host
 │   ├── pvc.yaml               # PVC for NFS models (40Gi, ReadWriteMany)
