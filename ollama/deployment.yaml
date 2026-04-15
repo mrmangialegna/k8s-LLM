@@ -28,8 +28,8 @@ spec:
               cpu: 2
               memory: 4Gi
             limits:
-              cpu: 6
-              memory: 10Gi
+              cpu: 10
+              memory: 20Gi
           volumeMounts:
             - name: ollama-pvc
               mountPath: /usr/share/ollama/.ollama
