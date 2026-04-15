@@ -1,0 +1,15 @@
+# ~/Project/2LMlocal/k8s/open-webui/ingressroute.yaml
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: open-webui
+  namespace: open-webui
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`openwebui.local`)
+      kind: Rule
+      services:
+        - name: open-webui
+          port: 8080

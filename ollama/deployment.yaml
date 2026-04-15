@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  namespace: ollama
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: worker-02
+      containers:
+        - name: ollama
+          image: ollama/ollama:latest
+          ports:
+            - containerPort: 11434
+          env:
+            - name: OLLAMA_MODELS
+              value: /usr/share/ollama/.ollama/models           
+          resources:  
+            requests:
+              cpu: 2
+              memory: 4Gi
+            limits:
+              cpu: 6
+              memory: 10Gi
+          volumeMounts:
+            - name: ollama-pvc
+              mountPath: /usr/share/ollama/.ollama
+            - name: ollama-data
+              mountPath: /root/.ollama               
+      volumes:
+        - name: ollama-pvc
+          persistentVolumeClaim:
+            claimName: ollama-pvc
+        - name: ollama-data
+          persistentVolumeClaim:
+            claimName: ollama-data-pvc

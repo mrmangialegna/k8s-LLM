@@ -1,0 +1,14 @@
+# ~/Project/2LMlocal/k8s/ollama/pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ollama-pvc
+  namespace: ollama
+spec:
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 40Gi
+  volumeName: ollama-models-pv
+  storageClassName: ""

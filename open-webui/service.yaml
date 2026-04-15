@@ -1,0 +1,13 @@
+# ~/Project/2LMlocal/k8s/open-webui/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: open-webui
+  namespace: open-webui
+spec:
+  selector:
+    app: open-webui
+  ports:
+    - port: 8080
+      targetPort: 8080
+  type: ClusterIP

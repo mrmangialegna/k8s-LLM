@@ -1,0 +1,16 @@
+# ~/Project/2LMlocal/k8s/ollama/pv.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ollama-models-pv
+spec:
+  capacity:
+    storage: 40Gi
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    server: 192.168.0.44
+    path: /usr/share/ollama/.ollama
+  mountOptions:
+    - hard
+    - nfsvers=4.1
