@@ -14,7 +14,7 @@ spec:
         app: ollama
     spec:
       nodeSelector:
-        kubernetes.io/hostname: worker-02
+        kubernetes.io/hostname: llm-worker
       containers:
         - name: ollama
           image: ollama/ollama:latest
