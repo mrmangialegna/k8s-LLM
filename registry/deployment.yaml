@@ -29,10 +29,10 @@ spec:
               value: /var/lib/registry
           resources:
             requests:
-              cpu: "250m"
+              cpu: "100m"
               memory: "256Mi"
             limits:
-              cpu: "2"
+              cpu: "1"
               memory: "2Gi"
       volumes:
         - name: registry-pvc
