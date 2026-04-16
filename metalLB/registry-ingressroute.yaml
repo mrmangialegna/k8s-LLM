@@ -5,7 +5,7 @@ metadata:
   namespace: registry
 spec:
   entryPoints:
-    - websecure # Change to "web" if using HTTP
+    - web # Change to "web" if using HTTP
   routes:
     - match: Host(`registry.local`) && PathPrefix(`/`)
       kind: Rule
