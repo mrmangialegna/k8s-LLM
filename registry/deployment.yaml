@@ -6,12 +6,6 @@ metadata:
 spec:
   replicas: 1
   selector:
-    nodeSelector:
-      kubernetes.io/hostname: registry
-    tolerations:
-      - key: dedicated
-        value: registry
-        effect: NoSchedule
     matchLabels:
       app: registry
   template:
@@ -19,6 +13,12 @@ spec:
       labels:
         app: registry
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: registry
+      tolerations:
+        - key: dedicated
+          value: registry
+          effect: NoSchedule
       containers:
         - name: registry
           image: registry:2
