@@ -1,0 +1,14 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: registry-ingressroute
+  namespace: registry
+spec:
+  entryPoints:
+    - web # Change to "web" if using HTTP
+  routes:
+    - match: Host(`registry.local`) && PathPrefix(`/`)
+      kind: Rule
+      services:
+        - name: registry
+          port: 5000
