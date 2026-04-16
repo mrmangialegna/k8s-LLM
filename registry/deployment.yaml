@@ -29,8 +29,11 @@ spec:
               value: /var/lib/registry
           resources:
             requests:
-              cpu: "500m"
-              memory: "1Gi"
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "512Mi"
       volumes:
         - name: registry-pvc
           persistentVolumeClaim:
