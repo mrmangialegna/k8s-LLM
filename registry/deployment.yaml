@@ -8,6 +8,10 @@ spec:
   selector:
     nodeSelector:
       kubernetes.io/hostname: registry
+    tolerations:
+      - key: dedicated
+        value: registry
+        effect: NoSchedule
     matchLabels:
       app: registry
   template:
