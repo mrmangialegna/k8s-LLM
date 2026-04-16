@@ -6,6 +6,8 @@ metadata:
 spec:
   replicas: 1
   selector:
+    nodeSelector:
+      kubernetes.io/hostname: registry
     matchLabels:
       app: registry
   template:
