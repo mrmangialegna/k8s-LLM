@@ -28,7 +28,7 @@ spec:
               cpu: 2
               memory: 4Gi
             limits:
-              cpu: 10
+              cpu: 8
               memory: 20Gi
           volumeMounts:
             - name: ollama-pvc
