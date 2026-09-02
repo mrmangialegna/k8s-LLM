@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: open-webui-config
+  namespace: open-webui
+data:
+   OLLAMA_BASE_URL: "http://ollama.ollama.svc.cluster.local:11434"
+   WEBUI_AUTH: "True"
+   DEFAULT_USER_ROLE: "pending"
+   ENABLE_SIGNUP: "True"
+   WEBUI_NAME: "2LMlocal AI"
+   GLOBAL_LOG_LEVEL: "INFO"
+   ENABLE_PERSISTENT_CONFIG: "False"

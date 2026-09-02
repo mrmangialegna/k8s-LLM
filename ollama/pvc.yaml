@@ -6,7 +6,7 @@ metadata:
   namespace: ollama
 spec:
   accessModes:
-    - ReadOnlyMany
+    - ReadWriteMany
   resources:
     requests:
       storage: 40Gi

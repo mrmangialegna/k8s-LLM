@@ -15,16 +15,82 @@ spec:
         app: open-webui
     spec:
       containers:
-        - name: open-webui
+
+        - startupProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            failureThreshold: 15S
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            failureThreshold: 3
+            periodSeconds: 20
+          
+          readinessProbe:
+            httpGet:
+              path: /api/tags
+              port: 8080
+            initialDelaySeconds: 10
+            failureThreshold: 3
+            periodSeconds: 10
+
+
+          name: open-webui
           image: ghcr.io/open-webui/open-webui:main
           ports:
             - containerPort: 8080
+          securityContext:
+            runAsNonRoot: true 
+            runAsUser: 1000
+            capabilities:
+            - drop: ["ALL"]
+          
           env:
             - name: OLLAMA_BASE_URL
-              value: http://ollama.ollama.svc.cluster.local:8000
+              valueFrom: 
+                configmapKeyRef:
+                  name: open-webui-config
+                  key: OLLAMA_BASE_URL
+              name: WEBUI_AUTH
+              valueFrom: 
+                configmapKeyRef:
+                  name: open-webui-config
+                  key: WEBUI_AUTH
+              name: DEFAULT_USER_ROLE
+              valueFrom: 
+                configmapKeyRef:
+                  name: open-webui-config
+                  key: DEFAULT_USER_ROLE
+              name: ENABLE_SIGNUP
+              valueFrom: 
+                configmapKeyRef:
+                  name: open-webui-config
+                  key: ENABLE_SIGNUP
+              name: WEBUI_NAME
+              valueFrom: 
+                configmapKeyRef:
+                  name: open-webui-config
+                  key: WEBUI_NAME
+              name: GLOBAL_LOG_LEVEL
+              valueFrom: 
+                configmapKeyRef:
+                  name: open-webui-config
+                  key: GLOBAL_LOG_LEVEL
+              name: ENABLE_PERSISTENT_CONFIG
+              valueFrom: 
+                configmapKeyRef:
+                  name: open-webui-config
+                  key: ENABLE_PERSISTENT_CONFIG
+          
+              
           resources:
             requests:
-              memory: "512Mi"
+              memory: "128Mi"
               cpu: "500m"
             limits:
               memory: "1Gi"

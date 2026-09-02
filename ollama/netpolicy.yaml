@@ -1,0 +1,70 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-from-openwebui
+  namespace: ollama
+spec:
+  podSelector:
+    matchLabels:
+      app: ollama
+  policyTypes:
+  - Ingress:
+  ingress:
+  - from: 
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: open-webui
+      podSelector:
+        matchLabels:
+          app: open-webui
+    port:
+    - protocol: TCP
+      port: 11434
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-from-prometheus
+  namespace: ollama            
+spec:
+  podSelector:
+    matchLabels:
+      app: ollama-exporter     
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: monitoring     
+      podSelector:
+        matchLabels:
+          app: prometheus                            
+    ports:
+    - protocol: TCP
+      port: 8000            
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ollama-egress
+  namespace: ollama
+spec:
+  podSelector:
+    matchLabels:
+      app: ollama
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - ipBlock:
+      cidr: 192.168.0.0/24     
+    - dns:
+      - registry.ollama.ai        
+    ports:
+    - protocol: TCP
+      port: 443                

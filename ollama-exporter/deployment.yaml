@@ -14,7 +14,23 @@ spec:
         app: ollama-exporter
     spec:
       containers:
-        - name: ollama-exporter
+        - livenessProbe:
+            httpGet:
+              path: /metrics
+              port: 8000
+            initialDelaySeconds: 10
+            failureThreshold: 3
+            periodSeconds: 15
+        
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: 8000
+            initialDelaySeconds: 5
+            failureThreshold: 3
+            periodSeconds: 5
+        
+          name: ollama-exporter
           image: 192.168.0.22:30964/ollama-exporter:latest
           ports:
             - containerPort: 8000
