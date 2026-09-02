@@ -14,14 +14,18 @@ spec:
         app: ollama-exporter
     spec:
       containers:
-        - livenessProbe:
+        - name: ollama-exporter
+          image: 192.168.0.22:30964/ollama-exporter:latest
+          ports:
+            - name: http
+              containerPort: 8000
+          livenessProbe:
             httpGet:
               path: /metrics
               port: 8000
             initialDelaySeconds: 10
             failureThreshold: 3
             periodSeconds: 15
-        
           readinessProbe:
             httpGet:
               path: /metrics
@@ -29,11 +33,6 @@ spec:
             initialDelaySeconds: 5
             failureThreshold: 3
             periodSeconds: 5
-        
-          name: ollama-exporter
-          image: 192.168.0.22:30964/ollama-exporter:latest
-          ports:
-            - containerPort: 8000
           env:
             - name: OLLAMA_HOST
               value: http://ollama.ollama.svc.cluster.local:11434

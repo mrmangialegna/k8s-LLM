@@ -6,20 +6,42 @@ metadata:
 spec:
   podSelector:
     matchLabels:
+      app: ollama-exporter
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: open-webui
+          podSelector:
+            matchLabels:
+              app: open-webui
+      ports:
+        - protocol: TCP
+          port: 8000
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-from-exporter
+  namespace: ollama
+spec:
+  podSelector:
+    matchLabels:
       app: ollama
   policyTypes:
-  - Ingress:
+    - Ingress
   ingress:
-  - from: 
-    - namespaceSelector:
-        matchLabels:
-          kubernetes.io/metadata.name: open-webui
-      podSelector:
-        matchLabels:
-          app: open-webui
-    port:
-    - protocol: TCP
-      port: 11434
+    - from:
+        - podSelector:
+            matchLabels:
+              app: ollama-exporter
+      ports:
+        - protocol: TCP
+          port: 11434
 
 ---
 
@@ -27,24 +49,46 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-from-prometheus
-  namespace: ollama            
+  namespace: ollama
 spec:
   podSelector:
     matchLabels:
-      app: ollama-exporter     
+      app: ollama-exporter
   policyTypes:
-  - Ingress
+    - Ingress
   ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          kubernetes.io/metadata.name: monitoring     
-      podSelector:
-        matchLabels:
-          app: prometheus                            
-    ports:
-    - protocol: TCP
-      port: 8000            
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - protocol: TCP
+          port: 8000
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-exporter-egress
+  namespace: ollama
+spec:
+  podSelector:
+    matchLabels:
+      app: ollama-exporter
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: ollama
+      ports:
+        - protocol: TCP
+          port: 11434
 
 ---
 
@@ -58,13 +102,27 @@ spec:
     matchLabels:
       app: ollama
   policyTypes:
-  - Egress
+    - Egress
   egress:
-  - to:
-    - ipBlock:
-      cidr: 192.168.0.0/24     
-    - dns:
-      - registry.ollama.ai        
-    ports:
-    - protocol: TCP
-      port: 443                
+    - to:
+        - ipBlock:
+            cidr: 192.168.0.0/24
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443

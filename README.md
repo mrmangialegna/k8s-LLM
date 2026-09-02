@@ -10,32 +10,41 @@ This repo is managed by ArgoCD. Every change pushed here is automatically reconc
 
 ```
 k8s/
-├── metalLB/
-│   ├── ipaddresspool.yaml          # IP pool 192.168.0.20-40
-│   ├── l2advertisement.yaml        # L2 advertisement config
-│   ├── argocd-ingress.yaml         # IngressRoute → argocd.local
-│   ├── grafana-ingress.yaml        # IngressRoute → grafana.local
-│   ├── open-webui-ingress.yaml     # IngressRoute → openwebui.local
-│   ├── prometheus-ingress.yaml     # IngressRoute → prometheus.local
-│   └── registry-ingress.yaml      # IngressRoute → registry.local
+├── Traefik/                        # MetalLB + Traefik IngressRoutes
+│   ├── ipaddresspool.yaml          # IPAddressPool + L2Advertisement (192.168.0.40-90)
+│   ├── argocd-ingress.yml          # IngressRoute → argocd.local
+│   ├── grafana-ingress.yml         # IngressRoute → grafana.local
+│   ├── open-webui-ingress.yml      # IngressRoute → openwebui.local
+│   ├── prometheus-ingree.yml       # IngressRoute → prometheus.local
+│   ├── registry-ingressroute.yaml  # IngressRoute → registry.local (HTTP)
+│   └── ingressroute.yaml           # IngressRoute → registry.local (HTTPS, duplicato)
 ├── ollama/
-│   ├── pv.yaml                     # PersistentVolume — NFS from Proxmox host
-│   ├── pvc.yaml                    # PVC NFS models (40Gi, ReadWriteMany)
-│   ├── pvc-data.yaml               # PVC local data (15Gi, local-path)
-│   ├── deployment.yaml             # Ollama deployment (pinned to llm-worker)
-│   └── service.yaml                # ClusterIP on port 11434
+│   ├── pv.yaml                     # PersistentVolume — NFS da host Proxmox (192.168.0.44)
+│   ├── pvc.yaml                    # PVC modelli NFS (40Gi, ReadWriteMany)
+│   ├── pvc-data.yaml               # PVC dati locali (15Gi, local-path)
+│   ├── configmap.yaml              # OLLAMA_KEEP_ALIVE, NUM_PARALLEL, MAX_LOADED_MODELS
+│   ├── deployment.yaml             # Deployment Ollama (pinned a llm-worker)
+│   ├── service.yaml                # ClusterIP porta 11434
+│   ├── netpolicy.yaml              # Ingress da exporter, egress NFS/DNS/HTTPS
+│   └── disruption.yaml             # PodDisruptionBudget
 ├── ollama-exporter/
-│   ├── deployment.yaml             # Ollama exporter proxy + metrics
-│   ├── service.yaml                # ClusterIP on port 8000
-│   └── servicemonitor.yaml         # Prometheus ServiceMonitor
+│   ├── deployment.yaml             # Proxy trasparente + metriche Prometheus
+│   ├── service.yaml                # ClusterIP porta 8000 (namespace ollama)
+│   └── servicemonitor.yaml         # ServiceMonitor per Prometheus (namespace monitoring)
 ├── open-webui/
-│   ├── pvc.yaml                    # PVC (15Gi, local-path)
+│   ├── configmap.yaml              # OLLAMA_BASE_URL, auth, ruoli utente
+│   ├── secret.yaml                 # WEBUI_SECRET_KEY
+│   ├── pvc.yaml                    # PVC dati utente (15Gi, local-path)
 │   ├── deployment.yaml             # Open WebUI → ollama-exporter:8000
-│   └── service.yaml                # ClusterIP on port 8080
+│   ├── service.yaml                # ClusterIP porta 8080
+│   ├── netpolicy.yaml              # Ingress da Traefik, egress verso exporter
+│   └── disruption.yaml             # PodDisruptionBudget
 └── registry/
     ├── pvc.yaml                    # PVC (20Gi, local-path)
-    ├── deployment.yaml             # Docker Registry (pinned to registry node)
-    └── service.yaml                # NodePort 30964
+    ├── deployment.yaml             # Docker Registry (pinned a nodo registry)
+    ├── service.yaml                # NodePort 30964
+    ├── netpolicy.yaml              # Ingress da build pod
+    └── disruption.yaml             # PodDisruptionBudget
 ```
 
 ---
@@ -54,7 +63,7 @@ Before applying these manifests the following must be in place:
 ```bash
 # MetalLB
 helm repo add metallb https://metallb.github.io/metallb
-helm install metallb metallb/metallb -n metallb --create-namespace
+helm install metallb metallb/metallb -n metallb-system --create-namespace
 
 # Traefik
 helm repo add traefik https://traefik.github.io/charts
@@ -124,7 +133,7 @@ docker push 192.168.0.22:30964/ollama-exporter:latest
 
 | Application | Path | Namespace |
 |---|---|---|
-| metallb | metalLB | metallb |
+| metallb | Traefik | metallb-system |
 | k8s-llm-ollama | ollama | ollama |
 | k8s-llm-openwebui | open-webui | open-webui |
 | ollama-exporter | ollama-exporter | ollama |
@@ -138,8 +147,9 @@ docker push 192.168.0.22:30964/ollama-exporter:latest
 
 Provides external IP addresses to LoadBalancer services (Traefik).
 
-- IP pool: `192.168.0.20 — 192.168.0.40`
-- All IngressRoutes are managed in this folder
+- Config in `Traefik/ipaddresspool.yaml` (IPAddressPool + L2Advertisement)
+- IP pool: `192.168.0.40 — 192.168.0.90`
+- IngressRoutes for all exposed services are in `Traefik/`
 
 > Important: use explicit range, not CIDR /24 — causes ARP conflicts.
 
@@ -210,7 +220,7 @@ Private image registry for cluster-built images.
 
 - Ollama processes one request at a time on CPU. Requests are queued.
 - First model load after pod restart is slow — ~4GB model read from NFS into RAM.
-- `KEEP_ALIVE` default is 5 minutes — model stays in RAM after last request.
+- `OLLAMA_KEEP_ALIVE` impostato a 10 minuti nel ConfigMap — il modello resta in RAM dopo l'ultima richiesta.
 - `llm-worker` is intentionally over-provisioned (10 vCPU, 20GB RAM).
 - `registry` node is minimal (1 vCPU, 2GB RAM) — Docker Registry is lightweight.
 - Prometheus CRDs are too large for standard `kubectl apply` — always use `--server-side`.

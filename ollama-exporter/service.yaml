@@ -2,11 +2,14 @@ apiVersion: v1
 kind: Service
 metadata:
   name: ollama-exporter
-  namespace: default
+  namespace: ollama
+  labels:
+    app: ollama-exporter
 spec:
   selector:
     app: ollama-exporter
   ports:
-    - port: 9464
-      targetPort: 9464
+    - name: http
+      port: 8000
+      targetPort: 8000
   type: ClusterIP

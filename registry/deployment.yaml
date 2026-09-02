@@ -13,25 +13,24 @@ spec:
       labels:
         app: registry
     spec:
-
       nodeSelector:
         kubernetes.io/hostname: registry
-
       tolerations:
         - key: dedicated
           value: registry
           effect: NoSchedule
-
       containers:
-
-        - livenessProbe:
+        - name: registry
+          image: registry:2
+          ports:
+            - containerPort: 5000
+          livenessProbe:
             httpGet:
               path: /v2/
               port: 5000
             initialDelaySeconds: 10
             failureThreshold: 3
             periodSeconds: 20
-        
           readinessProbe:
             httpGet:
               path: /v2/
@@ -39,11 +38,6 @@ spec:
             initialDelaySeconds: 5
             failureThreshold: 3
             periodSeconds: 10
-        
-          name: registry
-          image: registry:2
-          ports:
-            - containerPort: 5000
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
@@ -59,6 +53,9 @@ spec:
             limits:
               cpu: "1"
               memory: "2Gi"
+          volumeMounts:
+            - name: registry-pvc
+              mountPath: /var/lib/registry
       volumes:
         - name: registry-pvc
           persistentVolumeClaim:

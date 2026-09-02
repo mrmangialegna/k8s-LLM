@@ -1,4 +1,3 @@
-# ~/Project/2LMlocal/k8s/open-webui/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,14 +14,16 @@ spec:
         app: open-webui
     spec:
       containers:
-
-        - startupProbe:
+        - name: open-webui
+          image: ghcr.io/open-webui/open-webui:main
+          ports:
+            - containerPort: 8080
+          startupProbe:
             httpGet:
               path: /health
               port: 8080
-            failureThreshold: 15S
+            failureThreshold: 15
             periodSeconds: 5
-
           livenessProbe:
             httpGet:
               path: /health
@@ -30,64 +31,54 @@ spec:
             initialDelaySeconds: 30
             failureThreshold: 3
             periodSeconds: 20
-          
           readinessProbe:
             httpGet:
-              path: /api/tags
+              path: /health
               port: 8080
             initialDelaySeconds: 10
             failureThreshold: 3
             periodSeconds: 10
-
-
-          name: open-webui
-          image: ghcr.io/open-webui/open-webui:main
-          ports:
-            - containerPort: 8080
           securityContext:
-            runAsNonRoot: true 
+            runAsNonRoot: true
             runAsUser: 1000
             capabilities:
-            - drop: ["ALL"]
-          
+              drop: ["ALL"]
           env:
             - name: OLLAMA_BASE_URL
-              valueFrom: 
-                configmapKeyRef:
+              valueFrom:
+                configMapKeyRef:
                   name: open-webui-config
                   key: OLLAMA_BASE_URL
-              name: WEBUI_AUTH
-              valueFrom: 
-                configmapKeyRef:
+            - name: WEBUI_AUTH
+              valueFrom:
+                configMapKeyRef:
                   name: open-webui-config
                   key: WEBUI_AUTH
-              name: DEFAULT_USER_ROLE
-              valueFrom: 
-                configmapKeyRef:
+            - name: DEFAULT_USER_ROLE
+              valueFrom:
+                configMapKeyRef:
                   name: open-webui-config
                   key: DEFAULT_USER_ROLE
-              name: ENABLE_SIGNUP
-              valueFrom: 
-                configmapKeyRef:
+            - name: ENABLE_SIGNUP
+              valueFrom:
+                configMapKeyRef:
                   name: open-webui-config
                   key: ENABLE_SIGNUP
-              name: WEBUI_NAME
-              valueFrom: 
-                configmapKeyRef:
+            - name: WEBUI_NAME
+              valueFrom:
+                configMapKeyRef:
                   name: open-webui-config
                   key: WEBUI_NAME
-              name: GLOBAL_LOG_LEVEL
-              valueFrom: 
-                configmapKeyRef:
+            - name: GLOBAL_LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
                   name: open-webui-config
                   key: GLOBAL_LOG_LEVEL
-              name: ENABLE_PERSISTENT_CONFIG
-              valueFrom: 
-                configmapKeyRef:
+            - name: ENABLE_PERSISTENT_CONFIG
+              valueFrom:
+                configMapKeyRef:
                   name: open-webui-config
                   key: ENABLE_PERSISTENT_CONFIG
-          
-              
           resources:
             requests:
               memory: "128Mi"

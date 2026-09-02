@@ -1,4 +1,3 @@
-# ~/Project/2LMlocal/k8s/ollama/pv.yaml
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -14,4 +13,6 @@ spec:
   mountOptions:
     - hard
     - nfsvers=4.1
-    - o rw,noexec,nosuid.vers=4.1
+    - rw
+    - noexec
+    - nosuid
