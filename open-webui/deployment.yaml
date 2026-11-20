@@ -81,10 +81,10 @@ spec:
                   key: ENABLE_PERSISTENT_CONFIG
           resources:
             requests:
-              memory: "128Mi"
+              memory: "1Gi"
               cpu: "500m"
             limits:
-              memory: "1Gi"
+              memory: "3Gi"
               cpu: "1"
           volumeMounts:
             - name: open-webui-data
