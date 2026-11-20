@@ -71,10 +71,10 @@ spec:
           resources:
             requests:
               cpu: 2
-              memory: 2Gi
+              memory: 6Gi
             limits:
               cpu: 4
-              memory: 6Gi
+              memory: 8Gi
           volumeMounts:
             - name: ollama-pvc
               mountPath: /usr/share/ollama/.ollama
