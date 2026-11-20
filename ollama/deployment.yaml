@@ -4,7 +4,7 @@ metadata:
   name: ollama
   namespace: ollama
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: ollama
@@ -56,17 +56,17 @@ spec:
             - name: OLLAMA_KEEP_ALIVE
               valueFrom:
                 configMapKeyRef:
-                  name: cmap_ollama
+                  name: cmap-ollama
                   key: OLLAMA_KEEP_ALIVE
             - name: OLLAMA_NUM_PARALLEL
               valueFrom:
                 configMapKeyRef:
-                  name: cmap_ollama
+                  name: cmap-ollama
                   key: OLLAMA_NUM_PARALLEL
             - name: OLLAMA_MAX_LOADED_MODELS
               valueFrom:
                 configMapKeyRef:
-                  name: cmap_ollama
+                  name: cmap-ollama
                   key: OLLAMA_MAX_LOADED_MODELS
           resources:
             requests:

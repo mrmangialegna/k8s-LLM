@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cmap_ollama
+  name: cmap-ollama
   namespace: ollama
 data:
   OLLAMA_KEEP_ALIVE: 10m
