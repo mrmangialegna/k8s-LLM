@@ -70,10 +70,10 @@ spec:
                   key: OLLAMA_MAX_LOADED_MODELS
           resources:
             requests:
-              cpu: 2
+              cpu: 4
               memory: 6Gi
             limits:
-              cpu: 4
+              cpu: 7
               memory: 8Gi
           volumeMounts:
             - name: ollama-pvc
