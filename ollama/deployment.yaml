@@ -21,7 +21,7 @@ spec:
           effect: "NoSchedule"
       containers:
         - name: ollama
-          image: ollama/ollama:latest
+          image: ollama/ollama:0.40.17
           ports:
             - containerPort: 11434
           startupProbe:
