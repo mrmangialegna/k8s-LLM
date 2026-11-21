@@ -6,6 +6,8 @@ metadata:
 spec:
   entryPoints:
     - websecure # Change to "web" if using HTTP
+  tls:
+    secretName: grafana-tls
   routes:
     - match: Host(`grafana.local`) && PathPrefix(`/`)
       kind: Rule

@@ -5,7 +5,9 @@ metadata:
   namespace: monitoring
 spec:
   entryPoints:
-    - websecure # Change to "web" if using HTTP
+    - websecure
+  tls:
+    secretName: prometheus-tls
   routes:
     - match: Host(`prometheus.local`) && PathPrefix(`/`)
       kind: Rule

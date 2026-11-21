@@ -5,7 +5,9 @@ metadata:
   namespace: argocd
 spec:
   entryPoints:
-    - websecure # Change to "web" if using HTTP
+    - websecure 
+  tls:
+    secretName: argocd-tls
   routes:
     - match: Host(`argocd.local`) && PathPrefix(`/`)
       kind: Rule

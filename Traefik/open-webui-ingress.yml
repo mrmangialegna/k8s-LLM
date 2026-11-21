@@ -6,7 +6,9 @@ metadata:
   namespace: open-webui
 spec:
   entryPoints:
-    - web
+    - websecure
+  tls:
+    secretName: openwebui-tls
   routes:
     - match: Host(`openwebui.local`)
       kind: Rule
