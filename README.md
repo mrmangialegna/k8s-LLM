@@ -49,8 +49,8 @@ helm repo add prometheus-community https://prometheus-community.github.io/helm-c
 helm install prometheus prometheus-community/kube-prometheus-stack \
   -n monitoring --create-namespace --server-side
 
-helm repo add argo https://argoproj.github.io/argo-helm
-helm install argocd argo/argo-cd -n argocd --create-namespace
+helm install argocd argo/argo-cd -n argocd --create-namespace \
+  --set 'configs.params.server\.insecure=true'
 
 helm repo add jetstack https://charts.jetstack.io
 helm install cert-manager jetstack/cert-manager -n cert-manager --create-namespace \
