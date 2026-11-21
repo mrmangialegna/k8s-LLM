@@ -21,7 +21,7 @@ spec:
           effect: NoSchedule
       containers:
         - name: registry
-          image: registry:2
+          image: registry:2.8.3
           ports:
             - containerPort: 5000
           livenessProbe:
