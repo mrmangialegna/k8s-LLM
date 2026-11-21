@@ -79,13 +79,19 @@ kubectl label nodes <node-name> role=llm
 registry node
 kubectl taint nodes registry dedicated=registry:NoSchedule
 ```
+7) ---- Secret creation
+````
+kubectl create namespace open-webui
+kubectl create secret generic open-webui-secret -n open-webui \
+  --from-literal=WEBUI_SECRET_KEY="$(openssl rand -hex 32)"
+````
 
-7) ----Once ArgoCD is running
+8) ----Once ArgoCD is running
 ```
 kubectl apply -f root-app.yaml
 ```
 
-8) ----ollama-exporter image
+9) ----ollama-exporter image
 ```
 git clone https://github.com/frcooper/ollama-exporter.git
 cd ollama-exporter
