@@ -3,7 +3,7 @@ k8s-LLM
 On-premise platform to run LLMs locally on Kubernetes.
 Managed with GitOps: ArgoCD watches this repo and applies every change to the cluster.
 
-----How it works
+1) ----How it works
 
 - Ollama runs the models, CPU only. Models are stored on NFS, so they survive pod restarts.
 - Open WebUI is the chat interface. Multi-user, public registration disabled.
@@ -13,7 +13,8 @@ Managed with GitOps: ArgoCD watches this repo and applies every change to the cl
 
 Models: constantly updating
 
---- Access
+
+2) ----Access
 
 Add the following lines to `/etc/hosts` on the client machine:
 ```
@@ -33,7 +34,7 @@ ArgoCD http://argocd.local
 Docker Registry http://registry.local:30964/v2/ 
 ```
 
-----Prerequisites
+3) ----Prerequisites
 
 Cluster Kubernetes 1.35+, Calico CNI, Helm on the control-plane.
 
@@ -52,14 +53,19 @@ helm install prometheus prometheus-community/kube-prometheus-stack \
 helm repo add argo https://argoproj.github.io/argo-helm
 helm install argocd argo/argo-cd -n argocd --create-namespace
 ```
-----StorageClass
+4) ----ONCE ARGOCD IS RUNNING
+```
+kubectl apply -f root-app.yaml
+```
+
+5) ----StorageClass
 ```
 kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
 ```
 
 NFS for the models: server on the Proxmox host, client on every worker.
 
----Proxmox host
+6) ---Proxmox host
 ```
 apt install nfs-kernel-server -y
 echo "/usr/share/ollama/.ollama 192.168.0.0/24(rw,sync,no_subtree_check,no_root_squash)" >> /etc/exports
@@ -69,12 +75,12 @@ exportfs -ra
 sudo apt install nfs-common -y
 ```
 
-----Registry node
+7) ----Registry node
 ```
 kubectl taint nodes registry dedicated=registry:NoSchedule
 ```
 
-----ollama-exporter image
+8) ----ollama-exporter image
 ```
 git clone https://github.com/frcooper/ollama-exporter.git
 cd ollama-exporter
