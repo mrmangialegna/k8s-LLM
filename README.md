@@ -34,11 +34,10 @@ ArgoCD http://argocd.local
 Docker Registry http://registry.local:30964/v2/ 
 ```
 
-3) ----Prerequisites
+3) ----Prerequisites + Helm components
 
 Cluster Kubernetes 1.35+, Calico CNI, Helm on the control-plane.
 
-----Helm components
 ```
 helm repo add metallb https://metallb.github.io/metallb
 helm install metallb metallb/metallb -n metallb-system --create-namespace
@@ -53,31 +52,37 @@ helm install prometheus prometheus-community/kube-prometheus-stack \
 helm repo add argo https://argoproj.github.io/argo-helm
 helm install argocd argo/argo-cd -n argocd --create-namespace
 ```
-4) ----ONCE ARGOCD IS RUNNING
-```
-kubectl apply -f root-app.yaml
-```
 
-5) ----StorageClass
+4) ----StorageClass
 ```
 kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
 ```
 
-NFS for the models: server on the Proxmox host, client on every worker.
+5) ----NFS
 
-6) ---Proxmox host
+NFS for the models: server on the Proxmox host, client on every worker.
 ```
+Proxmox host
 apt install nfs-kernel-server -y
 echo "/usr/share/ollama/.ollama 192.168.0.0/24(rw,sync,no_subtree_check,no_root_squash)" >> /etc/exports
 exportfs -ra
 
-# every worker
+every worker
 sudo apt install nfs-common -y
 ```
 
-7) ----Registry node
+6) ----Nodes
 ```
+node that runs Ollama
+kubectl label nodes <node-name> role=llm
+
+registry node
 kubectl taint nodes registry dedicated=registry:NoSchedule
+```
+
+7) ----Once ArgoCD is running
+```
+kubectl apply -f root-app.yaml
 ```
 
 8) ----ollama-exporter image
