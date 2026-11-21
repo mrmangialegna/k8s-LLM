@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ollama-exporter
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/mrmangialegna/k8s-LLM.git
+    targetRevision: HEAD
+    path:   ollama-exporter
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ollama 
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
