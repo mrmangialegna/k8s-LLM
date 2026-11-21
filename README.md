@@ -51,6 +51,10 @@ helm install prometheus prometheus-community/kube-prometheus-stack \
 
 helm repo add argo https://argoproj.github.io/argo-helm
 helm install argocd argo/argo-cd -n argocd --create-namespace
+
+helm repo add jetstack https://charts.jetstack.io
+helm install cert-manager jetstack/cert-manager -n cert-manager --create-namespace \
+  --version v1.21.3 --set crds.enabled=true
 ```
 
 4) ----StorageClass
