@@ -79,6 +79,11 @@ spec:
                 configMapKeyRef:
                   name: open-webui-config
                   key: ENABLE_PERSISTENT_CONFIG
+            - name: WEBUI_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: open-webui-secret
+                  key: WEBUI_SECRET_KEY
           resources:
             requests:
               memory: "1Gi"
