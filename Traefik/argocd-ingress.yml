@@ -12,5 +12,5 @@ spec:
     - match: Host(`argocd.local`) && PathPrefix(`/`)
       kind: Rule
       services:
-        - name: argo-cd-argocd-server
+        - name: argocd-server
           port: 80
