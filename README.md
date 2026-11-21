@@ -111,17 +111,17 @@ openssl req -x509 -new -key root.key -sha256 -days 3650 \
 #CHECK IT AGAIN
 openssl x509 -in root.crt -noout -subject -dates -ext basicConstraints,keyUsage
 
-#CREATE THE INTERMIDIATE KEY
+#CREATE THE INTERMEDIATE KEY
 cd ~/ca
 openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-256 -out intermediate.key
 chmod 600 intermediate.key
 
 #CSR Request
 openssl req -new -key intermediate.key \
-  -subj "/CN= --A-NAME-YOU-CHOOSE--" \
+  -subj "/CN=--A-NAME-YOU-CHOOSE--" \
   -out intermediate.csr
 
-#DEFINE INTERMIDIATE
+#DEFINE INTERMEDIATE
 nano ~/ca/intermediate.ext
 
 # paste this into the file:
