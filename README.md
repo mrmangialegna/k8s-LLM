@@ -27,11 +27,22 @@ Models: constantly updating
 
 #Services URL 
 ```
-Open WebUI http://openwebui.local 
-Grafana http://grafana.local 
-Prometheus http://prometheus.local 
-ArgoCD http://argocd.local 
+Open WebUI https://openwebui.local 
+Grafana https://grafana.local 
+Prometheus https://prometheus.local 
+ArgoCD https://argocd.local 
 Docker Registry http://registry.local:30964/v2/ 
+```
+
+#CA ROOT INSTALLATION
+```
+#Fedora / RHEL
+sudo cp root.crt /etc/pki/ca-trust/source/anchors/yourrootCA.crt
+sudo update-ca-trust
+
+#Debian / Ubuntu
+sudo cp root.crt /usr/local/share/ca-certificates/yourrootCA.crt
+sudo update-ca-certificates
 ```
 
 3) ----Prerequisites + Helm components
@@ -43,7 +54,10 @@ helm repo add metallb https://metallb.github.io/metallb
 helm install metallb metallb/metallb -n metallb-system --create-namespace
 
 helm repo add traefik https://traefik.github.io/charts
-helm install traefik traefik/traefik -n kube-system
+helm install traefik traefik/traefik -n kube-system \
+  --set ports.web.http.redirections.entryPoint.to=websecure \
+  --set ports.web.http.redirections.entryPoint.scheme=https \
+  --set ports.web.http.redirections.entryPoint.permanent=true
 
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm install prometheus prometheus-community/kube-prometheus-stack \
@@ -90,7 +104,7 @@ kubectl create secret generic open-webui-secret -n open-webui \
   --from-literal=WEBUI_SECRET_KEY="$(openssl rand -hex 32)"
 ````
 8) ----CA
-````
+```
 #!!!YOUR ROOT KEY MUST BE STORED ALWAYS OFFLINE!!!
 #CREATE THE FILE WITH:
 mkdir -p ~/ca
@@ -145,7 +159,7 @@ openssl verify -CAfile root.crt intermediate.crt
 #AND LAST FOR K8
 kubectl create secret tls intermediate-ca -n cert-manager \
   --cert=intermediate.crt --key=intermediate.key
-````
+```
 9) ----Once ArgoCD is running
 ```
 kubectl apply -f root-app.yaml
