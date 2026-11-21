@@ -16,7 +16,7 @@ Models: constantly updating
 
 2) ----Access
 
-Add the following lines to `/etc/hosts` on the client machine:
+#Add the following lines to `/etc/hosts` on the client machine:
 ```
 192.168.0.201  openwebui.local
 192.168.0.201  grafana.local
@@ -25,7 +25,7 @@ Add the following lines to `/etc/hosts` on the client machine:
 192.168.0.22   registry.local
 ```
 
-Services URL 
+#Services URL 
 ```
 Open WebUI http://openwebui.local 
 Grafana http://grafana.local 
@@ -36,7 +36,7 @@ Docker Registry http://registry.local:30964/v2/
 
 3) ----Prerequisites + Helm components
 
-Cluster Kubernetes 1.35+, Calico CNI, Helm on the control-plane.
+#Cluster Kubernetes 1.35+, Calico CNI, Helm on the control-plane.
 
 ```
 helm repo add metallb https://metallb.github.io/metallb
@@ -66,21 +66,21 @@ kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisione
 
 NFS for the models: server on the Proxmox host, client on every worker.
 ```
-Proxmox host
+#Proxmox host
 apt install nfs-kernel-server -y
 echo "/usr/share/ollama/.ollama 192.168.0.0/24(rw,sync,no_subtree_check,no_root_squash)" >> /etc/exports
 exportfs -ra
 
-every worker
+#every worker
 sudo apt install nfs-common -y
 ```
 
 6) ----Nodes
 ```
-node that runs Ollama
+#node that runs Ollama
 kubectl label nodes <node-name> role=llm
 
-registry node
+#registry node
 kubectl taint nodes registry dedicated=registry:NoSchedule
 ```
 7) ---- Secret creation
@@ -89,13 +89,69 @@ kubectl create namespace open-webui
 kubectl create secret generic open-webui-secret -n open-webui \
   --from-literal=WEBUI_SECRET_KEY="$(openssl rand -hex 32)"
 ````
+8) ----CA
+````
+#!!!YOUR ROOT KEY MUST BE STORED ALWAYS OFFLINE!!!
+#CREATE THE FILE WITH:
+mkdir -p ~/ca
+chmod 700 ~/ca
+cd ~/ca
+openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-256 -aes256 -out root.key
 
-8) ----Once ArgoCD is running
+#REVIEW THE FILE HEADER
+head -1 ~/ca/root.key
+
+#CREATE THE CA
+openssl req -x509 -new -key root.key -sha256 -days 3650 \
+  -subj "/CN=yourrootCA" \
+  -addext "basicConstraints=critical,CA:TRUE" \
+  -addext "keyUsage=critical,keyCertSign,cRLSign" \
+  -out root.crt
+
+#CHECK IT AGAIN
+openssl x509 -in root.crt -noout -subject -dates -ext basicConstraints,keyUsage
+
+#CREATE THE INTERMIDIATE KEY
+cd ~/ca
+openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-256 -out intermediate.key
+chmod 600 intermediate.key
+
+#CSR Request
+openssl req -new -key intermediate.key \
+  -subj "/CN= --A-NAME-YOU-CHOOSE--" \
+  -out intermediate.csr
+
+#DEFINE INTERMIDIATE
+nano ~/ca/intermediate.ext
+
+# paste this into the file:
+basicConstraints = critical, CA:TRUE, pathlen:0
+keyUsage = critical, keyCertSign, cRLSign
+nameConstraints = critical, permitted;DNS:local
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always
+
+#SIGN WITH THE ROOT
+openssl x509 -req -in intermediate.csr \
+  -CA root.crt -CAkey root.key -CAcreateserial \
+  -days 1825 -sha256 \
+  -extfile intermediate.ext \
+  -out intermediate.crt
+
+#LAST CHECKS
+openssl x509 -in intermediate.crt -noout -subject -issuer -dates -ext basicConstraints,nameConstraints
+openssl verify -CAfile root.crt intermediate.crt
+
+#AND LAST FOR K8
+kubectl create secret tls intermediate-ca -n cert-manager \
+  --cert=intermediate.crt --key=intermediate.key
+````
+9) ----Once ArgoCD is running
 ```
 kubectl apply -f root-app.yaml
 ```
 
-9) ----ollama-exporter image
+10) ----ollama-exporter image
 ```
 git clone https://github.com/frcooper/ollama-exporter.git
 cd ollama-exporter
@@ -104,3 +160,6 @@ docker push 192.168.0.22:30964/ollama-exporter:latest
 ```
 
 The registry is HTTP: add `192.168.0.22:30964` to `insecure-registries` in the Docker daemon of the build machine.
+
+
+
