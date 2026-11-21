@@ -5,7 +5,7 @@ metadata:
   namespace: monitoring
 spec:
   entryPoints:
-    - websecure # Change to "web" if using HTTP
+    - websecure 
   tls:
     secretName: grafana-tls
   routes:
