@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: openwebui-tls
+  namespace: open-webui
+spec:
+  secretName: openwebui-tls
+  dnsNames:
+    - openwebui.local
+  issuerRef:
+    kind: ClusterIssuer
+    name: intermediate-ca
